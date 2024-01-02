@@ -9,6 +9,8 @@ from .models import User
 from .dto import ResponseDTO
 from .utils import to_dict_user
 
+import bcrypt
+
 def create_user(request_body):
     responseDTO = ResponseDTO()
 
@@ -33,7 +35,9 @@ def create_user(request_body):
         return JsonResponse(responseDTO.to_dict(), safe=False)
     
     try:
-        user = User(username=username,password=password)
+        b_password = password.encode('utf-8')
+        hashed_password = bcrypt.hashpw(b_password, bcrypt.gensalt())
+        user = User(username=username,password=hashed_password)
         user.save()
         responseDTO.data = to_dict_user(user)
     except IntegrityError:
